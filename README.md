@@ -14,15 +14,10 @@ Python Version: 3.6.5<br>
 Tensorflow-gpu<br>
 other necessary libs needed to be import<br>
 
-## Running the google download tests
-
-
 ### Break down into end to end tests
 
 
 ## Running the model
-
-  
 
 ### Website interface
  
