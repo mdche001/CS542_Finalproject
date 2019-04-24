@@ -14,10 +14,10 @@ dtype = {
     'click_id': 'uint32',
 }
 
+
 def group_label(df, group_cols):
     for i, cols in enumerate(group_cols):
         col_name = "_".join(group_cols)
-
         print(i, col_name)
         group_idx = df.drop_duplicates(cols)[cols].reset_index()
         group_idx.rename(columns={'index': col_name}, inplace=True)
@@ -34,6 +34,17 @@ def count_agg(df, group_cols):
         count = df.groupby(cols).size().reset_index(name=col_name)
         df = df.merge(count, on=cols, how='left')
         del count
+        gc.collect()
+    return df
+
+
+def variance(df, group_cols):
+    for i, cols in enumerate(group_cols):
+        col_name = "_".join(cols) + '_var'
+        print(i, col_name)
+        temp = df.groupby(cols)[['hour']].var().reset_index().rename(index=str, columns={'hour':col_name})
+        df = df.merge(temp, on =cols, how='left')
+        del temp
         gc.collect()
     return df
 
@@ -134,24 +145,23 @@ def time_frequence(df):
     plt.title("Frequent seconds")
     plt.xlabel("Seconds")
     plt.ylabel("Number")
-    plt.show()
+    # plt.show()
 
 
 def generate_features(df):
     print('generating time features...')
-    # df['day'] = pd.to_datetime[df.click_time].dt.day.astype('uint8')
-    # df['hour'] = pd.to_datetime[df.click_time].dt.hour.astype('uint8')
-    # df['minute'] = pd.to_datetime(df.click_time).dt.minute.astype('uint8')
-    # df['second'] = pd.to_datetime(df.click_time).dt.second.astype('uint8')
-    # df['in_test_hh'] = (3 - 2 * df['hour'].isin([4, 5, 9, 10, 13, 14])  # most frequent
-    #                     - 1 * df['hour'].isin([6, 11, 15])).astype('uint8')  # least frequent
-    # print('done')
     time_features(df)
     gc.collect()
 
     group_combinations = [
         # ['app', 'device'],
         # ['app', 'channel']
+    ]
+
+    var_combination = [
+        ['ip', 'app', 'channel'],
+        ['ip', 'app', 'os'],
+        ['ip','app','device'],
     ]
 
     count_combinations = [
@@ -199,15 +209,16 @@ def generate_features(df):
 
     df = group_label(df, group_combinations)
     df = count_agg(df, count_combinations)
+    df = variance(df,var_combination)
     df = count_cum(df, accum_combinations)
     df = count_uniq(df, countUniq_combinations)
-    df['click_time'] = (df['click_time'].astype(np.int64) // 10 ** 9).astype(np.int32)
+    # df['click_time'] = (df['click_time'].astype(np.int64) // 10 ** 9).astype(np.int32)
+    df['click_time'] = (df['click_time'].astype(np.int64))
     df = next_click(df, nextClick_combinations)
     df = frequence(df, freq_combinations)
 
     # df.drop(['ip', 'click_time', 'day', 'in_test_hh'], axis=1, inplace=True)
     gc.collect()
-    # print(df.info())
     return df
 
 
@@ -223,13 +234,14 @@ train_df = pd.read_csv('train_sample.csv', dtype=dtype, usecols=train_cols, pars
 #
 # common_cols = ['ip', 'app', 'device', 'os', 'channel', 'click_time']
 # all_df = pd.concat([train_df[common_cols], test_df[common_cols]])
-time_features(train_df)
-time_frequence(train_df)
+# time_features(train_df)
+# time_frequence(train_df)
 # generate data
 all_df = generate_features(train_df)
-train_features = all_df.iloc[:train_df.shape[0]]
 gc.collect()
-
-
-print(train_df.head())
-print(train_df.keys())
+print(all_df.info())
+# train_df.to_csv(path_or_buf="ff.csv")
+# train_features = all_df.iloc[:train_df.shape[0]]
+#
+#
+# print(train_df.head())
