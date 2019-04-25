@@ -11,15 +11,16 @@
 ### Prerequisites
 
 Python Version: 3.6.5<br>		
-Tensorflow-gpu<br>
-other necessary libs needed to be import<br>
+Lightgbm<br>
+numpy<br>
+scipy<br>
+xgboost<br>
 
 ### Break down into end to end tests
 
 
 ## Running the model
 
-### Website interface
  
 
 ## Authors
