@@ -2,6 +2,8 @@ import gc
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import datetime
+
 
 
 dtype = {
@@ -14,6 +16,7 @@ dtype = {
     'click_id': 'uint32',
 }
 
+predictor=['ip','app','device','os','channel','is_attributed','click_id']
 
 def group_label(df, group_cols):
     for i, cols in enumerate(group_cols):
@@ -24,6 +27,7 @@ def group_label(df, group_cols):
         df = df.merge(group_idx, on=cols, how='left')
         del group_idx
         gc.collect()
+        predictor.append(col_name)
     return df
 
 
@@ -35,6 +39,7 @@ def count_agg(df, group_cols):
         df = df.merge(count, on=cols, how='left')
         del count
         gc.collect()
+        predictor.append(col_name)
     return df
 
 
@@ -46,6 +51,7 @@ def variance(df, group_cols):
         df = df.merge(temp, on =cols, how='left')
         del temp
         gc.collect()
+        predictor.append(col_name)
     return df
 
 
@@ -55,6 +61,7 @@ def count_cum(df, group_cols):
         print(i, col_name)
         df[col_name] = df.groupby(cols).cumcount()
         gc.collect()
+        predictor.append(col_name)
     return df
 
 
@@ -67,6 +74,7 @@ def count_uniq(df, group_uniq_cols):
         df = df.merge(tmp, on=group_cols, how='left')
         del tmp
         gc.collect()
+        predictor.append(col_name)
     return df
 
 
@@ -74,23 +82,37 @@ def next_click(df, group_cols):
     for i, cols in enumerate(group_cols):
         col_name = "_".join(cols) + '_nextClick'
         print(i, col_name)
-        df[col_name] = (df.groupby(cols).click_time.shift(-1) - df.click_time).astype(np.float32)
+        df[col_name] = (df.groupby(cols).date.shift(-1) - df.date).dt.seconds.astype(type)
         gc.collect()
+        predictor.append(col_name)
     return df
 
 
-def frequence(df, group_cols):
+def previous_click(df, group_cols):
     for i, cols in enumerate(group_cols):
-        col_name = "_".join(cols) + '_nextClick'
+        col_name = "_".join(cols) + '_PreviousClick'
         print(i, col_name)
-        clickFreq = df.groupby(cols)[col_name].mean().dropna().reset_index(name=("_".join(cols) + '_clickFreq'))
-        df = df.merge(clickFreq, on=cols, how='left')
-        del clickFreq
+        # df[col_name] = (df.groupby(cols).date.shift(-5)-df.date).dt.seconds.astype(type)
+        df[col_name] = (df.date - df.groupby(cols).date.shift(+1)).dt.seconds.astype(type)
+
         gc.collect()
+        predictor.append(col_name)
     return df
+
+
+# def frequence(df, group_cols):
+#     for i, cols in enumerate(group_cols):
+#         col_name = "_".join(cols) + '_nextClick'
+#         print(i, col_name)
+#         clickFreq = df.groupby(cols)[col_name].mean().dropna().reset_index(name=("_".join(cols) + '_clickFreq'))
+#         df = df.merge(clickFreq, on=cols, how='left')
+#         del clickFreq
+#         gc.collect()
+#     return df
 
 
 def time_features(df):
+    df['date'] = pd.to_datetime(df.click_time)
     df['hour'] = pd.to_datetime(df.click_time).dt.hour.astype('uint8')
     df['day'] = pd.to_datetime(df.click_time).dt.day.astype('uint8')
     df['minute'] = pd.to_datetime(df.click_time).dt.minute.astype('uint8')
@@ -99,6 +121,12 @@ def time_features(df):
                         - 1 * df['hour'].isin([6, 11, 15])).astype('uint8')  # least frequent
     # Dataframe['frequency_hour'] = Dataframe['hour'].value_counts().sort_index()
     # print(Dataframe.columns)
+    predictor.append('date')
+    predictor.append('hour')
+    predictor.append('day')
+    predictor.append('minute')
+    predictor.append('second')
+    predictor.append('om_test_hh')
     print(df.head())
     print('done')
     gc.collect()
@@ -145,7 +173,7 @@ def time_frequence(df):
     plt.title("Frequent seconds")
     plt.xlabel("Seconds")
     plt.ylabel("Number")
-    # plt.show()
+    plt.show()
 
 
 def generate_features(df):
@@ -212,12 +240,13 @@ def generate_features(df):
     df = variance(df,var_combination)
     df = count_cum(df, accum_combinations)
     df = count_uniq(df, countUniq_combinations)
-    # df['click_time'] = (df['click_time'].astype(np.int64) // 10 ** 9).astype(np.int32)
-    df['click_time'] = (df['click_time'].astype(np.int64))
+    df['click_time'] = (df['click_time'].astype(np.int64)).astype(np.int32)
     df = next_click(df, nextClick_combinations)
-    df = frequence(df, freq_combinations)
+    df = previous_click(df, nextClick_combinations)
+    # df = frequence(df, freq_combinations)
 
     # df.drop(['ip', 'click_time', 'day', 'in_test_hh'], axis=1, inplace=True)
+    print(df.info())
     gc.collect()
     return df
 
@@ -234,13 +263,12 @@ train_df = pd.read_csv('train_sample.csv', dtype=dtype, usecols=train_cols, pars
 #
 # common_cols = ['ip', 'app', 'device', 'os', 'channel', 'click_time']
 # all_df = pd.concat([train_df[common_cols], test_df[common_cols]])
-# time_features(train_df)
-# time_frequence(train_df)
+time_features(train_df)
+time_frequence(train_df)
 # generate data
 all_df = generate_features(train_df)
 gc.collect()
-print(all_df.info())
-# train_df.to_csv(path_or_buf="ff.csv")
+# all_df.to_csv(path_or_buf="ff.csv")
 # train_features = all_df.iloc[:train_df.shape[0]]
 #
 #
