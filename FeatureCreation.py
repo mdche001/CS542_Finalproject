@@ -3,8 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import datetime
-
-
+import seaborn as sns
 
 dtype = {
     'ip' :'uint32',
@@ -88,16 +87,6 @@ def next_click(df, group_cols):
     return df
 
 
-def previous_click(df, group_cols):
-    for i, cols in enumerate(group_cols):
-        col_name = "_".join(cols) + '_PreviousClick'
-        print(i, col_name)
-        # df[col_name] = (df.groupby(cols).date.shift(-5)-df.date).dt.seconds.astype(type)
-        df[col_name] = (df.date - df.groupby(cols).date.shift(+1)).dt.seconds.astype(type)
-
-        gc.collect()
-        predictor.append(col_name)
-    return df
 
 
 # def frequence(df, group_cols):
@@ -138,14 +127,6 @@ def time_frequence(df):
     frequent_day = df.day.value_counts().sort_index()
     frequent_minute = df.minute.value_counts().sort_index()
     frequent_second = df.second.value_counts().sort_index()
-    # print("Frequent hours")
-    # print(frequent_hour)
-    # print("Frequent days")
-    # print(frequent_day)
-    # print("Frequent minutes")
-    # print(frequent_minute)
-    # print("Frequent seconds")
-    # print(frequent_minute)
     plt.figure(figsize=(15, 15))
 
     plt.subplot(221)
@@ -176,6 +157,24 @@ def time_frequence(df):
     plt.show()
 
 
+def attributedAnalysis(df):
+    var = ['day', 'hour']
+    for feature in var:
+        fig, ax = plt.subplots(figsize=(16, 6))
+        # Calculate the percentage of target=1 per category value
+        cat_perc = df[[feature, 'is_attributed']].groupby([feature], as_index=False).mean()
+        cat_perc.sort_values(by='is_attributed', ascending=False, inplace=True)
+        # Bar plot
+        sns.barplot(ax=ax, x=feature, y='is_attributed', data=cat_perc)
+        plt.ylabel('Percent of Download', fontsize=12)
+        plt.xlabel(feature, fontsize=12)
+        plt.tick_params(axis='both', which='major', labelsize=12)
+        plt.show()
+
+
+
+
+
 def generate_features(df):
     print('generating time features...')
     time_features(df)
@@ -194,26 +193,26 @@ def generate_features(df):
 
     count_combinations = [
         ['app'],
-        ['ip'],  # 3.03
+        ['ip'],
         ['channel'],
         ['os'],
-        ['ip', 'device'],  # 9.88
-        ['day', 'hour', 'app'],  # 4.08
-        ['app', 'channel'],  # 2.8
-        ['ip', 'day', 'in_test_hh'],  # 1.74
-        ['ip', 'day', 'hour'],  # 0.52
-        ['os', 'device'],  # 0.44
-        ['ip', 'os', 'day', 'hour'],  # 0.41
-        ['ip', 'device', 'day', 'hour'],  # 0.31
-        ['ip', 'app', 'os']  # 0.21
+        ['ip', 'device'],
+        ['day', 'hour', 'app'],
+        ['app', 'channel'],
+        ['ip', 'day', 'in_test_hh'],
+        ['ip', 'day', 'hour'],
+        ['os', 'device'],
+        ['ip', 'os', 'day', 'hour'],
+        ['ip', 'device', 'day', 'hour'],
+        ['ip', 'app', 'os']
     ]
 
     countUniq_combinations = [
         [['app'],'ip'],
         [['app', 'device', 'os', 'channel'], 'ip'],
-        [['ip'], 'channel'],  # 0.9
-        [['ip'], 'app'],  # 1.3
-        [['ip'], 'os']  # 0.45
+        [['ip'], 'channel'],
+        [['ip'], 'app'],
+        [['ip'], 'os']
     ]
 
     nextClick_combinations = [
@@ -242,34 +241,24 @@ def generate_features(df):
     df = count_uniq(df, countUniq_combinations)
     df['click_time'] = (df['click_time'].astype(np.int64)).astype(np.int32)
     df = next_click(df, nextClick_combinations)
-    df = previous_click(df, nextClick_combinations)
     # df = frequence(df, freq_combinations)
-
-    # df.drop(['ip', 'click_time', 'day', 'in_test_hh'], axis=1, inplace=True)
     print(df.info())
     gc.collect()
     return df
 
 
 
-# train: (184903890, 7)
-# test: (18790469, 7)
 train_cols = ['ip', 'app', 'device', 'os', 'channel', 'click_time', 'is_attributed']
-train_df = pd.read_csv('train_sample.csv', dtype=dtype, usecols=train_cols, parse_dates=['click_time'])
+# train_cols = ['ip', 'app', 'device', 'os', 'channel', 'click_time']
 
-# test_cols = ['ip', 'app', 'device', 'os', 'channel', 'click_time', 'click_id']
-# # using test_supplement
-# test_df = pd.read_csv('data/test_supplement.csv', dtype=dtype, usecols=test_cols, parse_dates=['click_time'])
-#
-# common_cols = ['ip', 'app', 'device', 'os', 'channel', 'click_time']
-# all_df = pd.concat([train_df[common_cols], test_df[common_cols]])
+train_df = pd.read_csv('train.csv', dtype=dtype, usecols=train_cols, parse_dates=['click_time'], nrows=10000000)
+
 time_features(train_df)
-time_frequence(train_df)
-# generate data
+# time_frequence(train_df)
+
 all_df = generate_features(train_df)
 gc.collect()
-# all_df.to_csv(path_or_buf="ff.csv")
-# train_features = all_df.iloc[:train_df.shape[0]]
-#
-#
-# print(train_df.head())
+print("Saving as csv file....")
+all_df.to_csv(path_or_buf="ProcessedData.csv")
+print("Complete")
+
