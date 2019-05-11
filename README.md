@@ -1,5 +1,9 @@
 # EC542_Finalproject
 
+## Project Introduction
+
+This is a Kaggle Competetion project
+Link: https://www.kaggle.com/c/talkingdata-adtracking-fraud-detection/overview
 
 ## Model diagram
 ![image](https://github.com/mdche001/EC542_Finalproject/blob/master/Image/Blank%20Diagram.png)
