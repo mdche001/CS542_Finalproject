@@ -2,7 +2,7 @@
 
 
 ## Model diagram
-
+![image](https://github.com/mdche001/EC542_Finalproject/blob/master/Image/Blank%20Diagram.png)
 
 
 ## Getting Started
@@ -21,13 +21,18 @@ scipy<br>
 xgboost<br>
 
 
+
+### Break down into end to end tests
+
+## Data Process
+
 ### Data visualization
 
+The Data visualization work in the DataVisualization.ipynb. This notebook include the analysis graph.
 
 ### Data processing
 
-
-### Break down into end to end tests
+In the FeatureCreation.py file, the new features construction is ccompleted. Provided more features for the model training.
 
 
 ## Running the model
