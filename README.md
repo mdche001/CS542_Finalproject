@@ -41,7 +41,7 @@ In the FeatureCreation.py file, the new features construction is ccompleted. Pro
 
 ## Running the model
 
- 
+ To get the XGBoost model, first run the processedxgboosttrain.py file, then u will get a model named processeddata_xgboost.model, which is only 2MB. With the model, you can run the 
 
 ## Authors
 
