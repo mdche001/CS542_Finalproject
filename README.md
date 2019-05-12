@@ -44,6 +44,7 @@ The Data visualization work in the DataVisualization.ipynb. This notebook includ
 ### Data processing
 
 In the FeatureCreation.py file, the new features construction is ccompleted. Provided more features for the model training.
+![image](https://github.com/mdche001/CS542_Finalproject/blob/master/Image/datafeature.png)
 
 ### Running the model
 #### LightGBM
