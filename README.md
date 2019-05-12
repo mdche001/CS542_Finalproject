@@ -49,11 +49,11 @@ In the FeatureCreation.py file, the new features construction is ccompleted. Pro
 ### Running the model
 #### LightGBM
 To download all related libraries to your environment and then run the main.ipynb to train and test the Lightgbm model. Then you can get the result<br>
-![image](https://github.com/mdche001/CS542_Finalproject/blob/master/Image/result_lgb.PNG)
+![image](https://github.com/mdche001/CS542_Finalproject/blob/master/Image/result_lgb.PNG)<br>
 And the importance of our features is as follows:<br>
-![image](https://github.com/mdche001/CS542_Finalproject/blob/master/Image/importance_lgb.PNG)
+![image](https://github.com/mdche001/CS542_Finalproject/blob/master/Image/importance_lgb.PNG)<br>
 You can also save your model if you want<br>
-![image](https://github.com/mdche001/CS542_Finalproject/blob/master/Image/save_lgb.PNG)
+![image](https://github.com/mdche001/CS542_Finalproject/blob/master/Image/save_lgb.PNG)<br>
 #### XGBoost
  To get the XGBoost model, first run the XGBoost.py file, then u will get a model named xgboost.model, which is only 2MB. With the model, you can run the testxgboost.py, then we can get the final result xgb_subnew.csv file, which is the version we got the following result on kaggle.
  
