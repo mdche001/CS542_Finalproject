@@ -43,6 +43,7 @@ In the FeatureCreation.py file, the new features construction is ccompleted. Pro
 
  To get the XGBoost model, first run the XGBoost.py file, then u will get a model named xgboost.model, which is only 2MB. With the model, you can run the testxgboost.py, then we can get the final result xgb_subnew file, which is the version we got the following result on kaggle.
  
+![image](https://github.com/mdche001/EC542_Finalproject/blob/master/Image/xgboost.png)
 
 ## Authors
 
