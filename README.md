@@ -1,4 +1,4 @@
-# EC542_Finalproject
+# CS542_Finalproject
 
 ## Project Introduction
 
